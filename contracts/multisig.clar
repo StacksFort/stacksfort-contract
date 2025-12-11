@@ -1,5 +1,12 @@
 ;; Multi-signature vault contract
 ;; Implements a multisig wallet for managing STX and SIP-010 tokens
+;;
+;; Clarity Version: 3 (local dev) / 4 (planned for mainnet)
+;; Clarity 4 Features: See CLARITY4-IMPLEMENTATION-PLAN.md for planned features:
+;;   - restrict-assets? (Issue #7) - Post-conditions for token transfers
+;;   - stacks-block-time (Issue #15) - Transaction expiration
+;;   - contract-hash? (Issue #7) - Token contract verification
+;;   - to-ascii? (Issues #2, #6, #7) - Enhanced logging
 
 ;; SIP-010 trait import - will be used for token transfers
 ;; Note: Trait syntax will be fixed when implementing Issue #7 (token transfers)
