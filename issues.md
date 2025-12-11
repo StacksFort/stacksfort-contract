@@ -114,7 +114,7 @@ This project will leverage Clarity 4 features for enhanced security and function
 
 ### Testing
 
-- [ ] **Issue #8**: Write initialization tests
+- [x] **Issue #8**: Write initialization tests
   - Test successful initialization with valid signers and threshold
   - Test owner-only restriction (non-owner cannot initialize)
   - Test one-time initialization (cannot initialize twice)
