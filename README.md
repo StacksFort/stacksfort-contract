@@ -119,7 +119,30 @@ clarinet deployment apply -p deployments/default.testnet-plan.yaml
 
 ## Dependencies
 
-- SIP-010 Trait: `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard`
+### Contract Dependencies
+
+- **SIP-010 Trait**: `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard`
+  - Standard interface for fungible tokens
+  - Used for SIP-010 token transfers
+
+### Testing Dependencies
+
+- **`@stacks/clarinet-sdk`** (v3.11.0) - Clarity 4 compatible SDK
+  - Provides simnet for local contract testing
+  - Clarity 4 feature support
+  - Contract deployment and interaction utilities
+
+- **`@stacks/clarinet-sdk-wasm`** (v3.11.0) - WASM runtime for Clarity
+  - WebAssembly runtime for executing Clarity contracts
+  - Required for running tests locally
+
+- **`@stacks/transactions`** (v7.2.0) - Transaction utilities for testing
+  - Used in test files to create Clarity values (`Cl`)
+  - Provides `signMessageHashRsv` for signature testing
+  - Helper functions for transaction building in tests
+
+- **`vitest`** (v3.2.4) - Test runner
+- **`vitest-environment-clarinet`** (v3.0.2) - Clarinet test environment
 
 ## Security Considerations
 
