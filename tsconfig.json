@@ -21,6 +21,7 @@
   },
   "include": [
     "tests/**/*",
-    "vitest.config.js"
+    "vitest.config.js",
+    "node_modules/@stacks/clarinet-sdk/vitest-helpers/src/**/*.d.ts"
   ]
 }
