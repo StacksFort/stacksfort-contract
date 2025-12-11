@@ -75,5 +75,10 @@
     (token (optional principal))
 )
     (response uint uint)
+    (begin
+        ;; Verify contract is initialized
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (ok u0)
+    )
 )
 
