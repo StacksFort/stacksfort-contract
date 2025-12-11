@@ -4,7 +4,6 @@ description = 'Multi-signature vault system on Stacks'
 authors = []
 telemetry = true
 cache_dir = './.cache'
-requirements = []
 
 [[project.requirements]]
 contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard'
@@ -12,6 +11,8 @@ contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standa
 [contracts.multisig]
 path = 'contracts/multisig.clar'
 clarity_version = 3
+# Note: Clarity 4 is live on mainnet (Bitcoin block 923222+)
+# When Clarinet supports Clarity 4, we can upgrade and use new features
 epoch = 'latest'
 
 [repl.analysis]

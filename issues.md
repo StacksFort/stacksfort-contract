@@ -2,11 +2,15 @@
 
 This document outlines all the issues and tasks needed to complete the Stacks Multisig Vaults project. Contributors can pick up any of these issues to work on.
 
+## Clarity 4 Features
+
+This project will leverage Clarity 4 features for enhanced security and functionality. See [CLARITY4-IMPLEMENTATION-PLAN.md](./CLARITY4-IMPLEMENTATION-PLAN.md) for detailed implementation plans. Clarity 4 features are noted in relevant issues below with **Clarity 4** tags.
+
 ## Smart Contract Issues
 
 ### Contract Setup & Structure
 
-- [ ] **Issue #0**: Set up contract structure and constants
+- [x] **Issue #0**: Set up contract structure and constants
   - Import SIP-010 trait: `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard`
   - Define constants: `CONTRACT_OWNER`, `MAX_SIGNERS` (u100), `MIN_SIGNATURES_REQUIRED` (u1)
   - Define all error constants (ERR_OWNER_ONLY, ERR_ALREADY_INITIALIZED, ERR_TOO_MANY_SIGNERS, etc.)
@@ -36,6 +40,7 @@ This document outlines all the issues and tasks needed to complete the Stacks Mu
   - Increment `txn-id` by 1
   - Print transaction details for logging
   - Return `(ok id)` with the transaction ID
+  - **Clarity 4**: Use `to-ascii?` for enhanced human-readable logging (see CLARITY4-IMPLEMENTATION-PLAN.md)
 
 - [ ] **Issue #3**: Implement `hash-txn` read-only function
   - Load transaction from `transactions` map using transaction ID
@@ -74,6 +79,7 @@ This document outlines all the issues and tasks needed to complete the Stacks Mu
   - Mark transaction as executed in `transactions` map
   - Print execution details for logging
   - Return `(ok true)`
+  - **Clarity 4**: Use `to-ascii?` for enhanced human-readable logging (see CLARITY4-IMPLEMENTATION-PLAN.md)
 
 - [ ] **Issue #7**: Implement `execute-token-transfer-txn` function
   - Verify caller is a signer
@@ -91,6 +97,10 @@ This document outlines all the issues and tasks needed to complete the Stacks Mu
   - Mark transaction as executed in `transactions` map
   - Print execution details for logging
   - Return `(ok true)`
+  - **Clarity 4 Features** (see CLARITY4-IMPLEMENTATION-PLAN.md):
+    - Use `restrict-assets?` to set post-conditions protecting assets (HIGH PRIORITY)
+    - Use `contract-hash?` to verify token contract authenticity (MEDIUM PRIORITY)
+    - Use `to-ascii?` for enhanced logging (LOW PRIORITY)
 
 ### Testing Setup
 
@@ -173,6 +183,11 @@ This document outlines all the issues and tasks needed to complete the Stacks Mu
 
 - [ ] **Issue #14**: Add reentrancy protection
 - [ ] **Issue #15**: Add transaction expiration mechanism
+  - Add `expiration` field to `transactions` map (uint timestamp)
+  - Update `submit-txn` to accept optional expiration parameter (default: 7 days)
+  - Add expiration check in execution functions (`execute-stx-transfer-txn`, `execute-token-transfer-txn`)
+  - Add error constant: `ERR_TXN_EXPIRED`
+  - **Clarity 4**: Use `stacks-block-time` to get current block timestamp (see CLARITY4-IMPLEMENTATION-PLAN.md)
 - [ ] **Issue #16**: Add ability to cancel pending transactions
 - [ ] **Issue #17**: Add signer management (add/remove signers)
 - [ ] **Issue #18**: Add threshold update functionality
