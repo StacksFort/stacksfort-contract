@@ -102,6 +102,8 @@
                 })
                 ;; Increment txn-id by 1
                 (var-set txn-id (+ current-id u1))
+                ;; Print transaction details for logging
+                (print {txn-id: current-id, type: txn-type, amount: amount, recipient: recipient, token: token})
                 (ok current-id)
             )
         )
