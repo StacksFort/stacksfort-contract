@@ -63,3 +63,17 @@
   bool
 )
 
+;; ============================================
+;; Public Functions
+;; ============================================
+
+;; Issue #2: Submit a new transaction proposal
+(define-public (submit-txn
+    (txn-type uint)
+    (amount uint)
+    (recipient principal)
+    (token (optional principal))
+)
+    (response uint uint)
+)
+
