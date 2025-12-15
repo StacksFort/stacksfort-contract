@@ -42,3 +42,14 @@ export function bufferHexFromOk(result: any): string {
   }
   return result.result.value.value;
 }
+
+export function countUniqueValidSignatures(txnId: number, signatures: string[]) {
+  const signatureList = Cl.list(signatures.map((signature) => Cl.bufferFromHex(signature)));
+
+  return simnet.callPublicFn(
+    "multisig",
+    "count-unique-valid-signatures",
+    [Cl.uint(txnId), signatureList],
+    simnet.deployer,
+  );
+}

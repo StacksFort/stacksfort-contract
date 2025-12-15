@@ -55,7 +55,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Verify principal is in signers list using `index-of`
   - Return `(ok signer)` if valid, error otherwise
 
-- [ ] **Issue #5**: Implement `count-valid-unique-signature` private function
+- [x] **Issue #5**: Implement `count-valid-unique-signature` private function
   - Take signature (buff 65) and accumulator tuple as parameters
   - Accumulator should contain: id (uint), hash (buff 32), count (uint)
   - Extract signer from signature using `extract-signer` function
@@ -64,6 +64,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - If valid and unique: mark signer as signed in `txn-signers` map, increment count
   - Return updated accumulator with incremented count
   - This function is used with `fold` to process a list of signatures
+  - Added a public `count-unique-valid-signatures` helper and tests to exercise duplicate/invalid signature handling
 
 - [ ] **Issue #6**: Implement `execute-stx-transfer-txn` function
   - Verify caller is a signer
