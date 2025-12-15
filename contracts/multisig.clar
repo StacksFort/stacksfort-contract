@@ -61,6 +61,7 @@
 (define-constant ERR_INSUFFICIENT_SIGNATURES (err u11))
 (define-constant ERR_INVALID_SIGNATURE (err u12))
 (define-constant ERR_INVALID_TOKEN (err u13))
+(define-constant ERR_STX_TRANSFER_FAILED (err u14))
 
 ;; ============================================
 ;; Data Variables
@@ -90,12 +91,12 @@
 )
 
 ;; Helpers for tracking which signers have approved a transaction
-(define-private (txn-signer-key (txn-id uint) (signer principal))
-    (tuple (txn-id txn-id) (signer signer))
+(define-private (txn-signer-key (target-id uint) (signer principal))
+    (tuple (txn-id target-id) (signer signer))
 )
 
-(define-private (build-signature-accumulator (txn-id uint) (hash (buff 32)))
-    (tuple (txn-id txn-id) (hash hash) (count u0))
+(define-private (build-signature-accumulator (target-id uint) (hash (buff 32)))
+    (tuple (txn-id target-id) (hash hash) (count u0))
 )
 
 ;; ============================================
@@ -205,7 +206,7 @@
     (accumulator (tuple (txn-id uint) (hash (buff 32)) (count uint)))
 )
     (match (extract-signer (get hash accumulator) signature)
-        ok signer
+        signer
             (let ((key (txn-signer-key (get txn-id accumulator) signer)))
                 (if (is-some (map-get? txn-signers key))
                     accumulator
@@ -219,7 +220,7 @@
                     )
                 )
             )
-        err accumulator
+        err-code accumulator
     )
 )
 
@@ -237,5 +238,80 @@
         ))
     )
         (ok (get count result))
+    )
+)
+
+;; Issue #6: Execute a pending STX transfer transaction
+(define-public (execute-stx-transfer-txn
+    (target-id uint)
+    (signatures (list 100 (buff 65)))
+)
+    (begin
+        ;; Verify contract is initialized
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+
+        ;; Verify caller is a signer
+        (asserts! (is-some (index-of (var-get signers) tx-sender)) ERR_NOT_SIGNER)
+
+        ;; Load and validate the transaction
+        (let (
+            (txn (unwrap! (map-get? transactions target-id) ERR_INVALID_TXN_ID))
+        )
+            ;; Verify transaction ID is valid (must be less than current txn-id)
+            (asserts! (< target-id (var-get txn-id)) ERR_INVALID_TXN_ID)
+
+            ;; Verify transaction type is STX (0)
+            (asserts! (is-eq (get type txn) u0) ERR_INVALID_TXN_TYPE)
+
+            ;; Verify transaction hasn't been executed
+            (asserts! (not (get executed txn)) ERR_TXN_ALREADY_EXECUTED)
+
+            ;; Verify signatures list length >= threshold
+            (asserts! (>= (len signatures) (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
+
+            ;; Compute txn hash and count unique valid signatures
+            (let (
+                (txn-hash (unwrap! (hash-txn target-id) ERR_INVALID_TXN_ID))
+                (result (fold
+                    count-valid-unique-signature
+                    signatures
+                    (build-signature-accumulator target-id txn-hash)
+                ))
+                (valid-count (get count result))
+            )
+                ;; Verify unique valid signature count >= threshold
+                (asserts! (>= valid-count (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
+
+                ;; Execute STX transfer from caller (tx-sender) to recipient
+                (let (
+                    (transfer-result (stx-transfer? (get amount txn) tx-sender (get recipient txn)))
+                )
+                    (match transfer-result
+                        ok-value
+                            (begin
+                                ;; Mark transaction as executed
+                                (map-set transactions target-id {
+                                    type: (get type txn),
+                                    amount: (get amount txn),
+                                    recipient: (get recipient txn),
+                                    token: (get token txn),
+                                    executed: true
+                                })
+                                ;; Log execution details
+                                (print {
+                                    txn-id: target-id,
+                                    type: u0,
+                                    amount: (get amount txn),
+                                    recipient: (get recipient txn),
+                                    signatures: (len signatures),
+                                    valid-signatures: valid-count
+                                })
+                                (ok true)
+                            )
+                        err-value ERR_STX_TRANSFER_FAILED
+                    )
+                )
+            )
+        )
     )
 )
