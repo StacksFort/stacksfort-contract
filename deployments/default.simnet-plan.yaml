@@ -44,7 +44,7 @@ plan:
     - id: 1
       transactions:
         - emulated-contract-publish:
-            contract-name: multisig
+            contract-name: stacksfort-v1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/multisig.clar
             clarity-version: 4
