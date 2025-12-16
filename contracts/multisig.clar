@@ -282,9 +282,9 @@
                 ;; Verify unique valid signature count >= threshold
                 (asserts! (>= valid-count (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
 
-                ;; Execute STX transfer from caller (tx-sender) to recipient
+                ;; Execute STX transfer from contract to recipient using as-contract wrapper
                 (let (
-                    (transfer-result (stx-transfer? (get amount txn) tx-sender (get recipient txn)))
+                    (transfer-result (as-contract (stx-transfer? (get amount txn) tx-sender (get recipient txn))))
                 )
                     (match transfer-result
                         ok-value
