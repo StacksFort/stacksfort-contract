@@ -66,7 +66,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - This function is used with `fold` to process a list of signatures
   - Added a public `count-unique-valid-signatures` helper and tests to exercise duplicate/invalid signature handling
 
-- [ ] **Issue #6**: Implement `execute-stx-transfer-txn` function
+- [x] **Issue #6**: Implement `execute-stx-transfer-txn` function
   - Verify caller is a signer
   - Load transaction from `transactions` map using transaction ID
   - Get transaction hash using `hash-txn` function
