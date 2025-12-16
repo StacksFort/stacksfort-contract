@@ -136,7 +136,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Test transaction is stored in transactions map
   - Test transaction is marked as not executed initially
 
-- [ ] **Issue #10**: Write signature verification tests
+- [ ] **Issue #10**: ❌ PENDING - Write signature verification tests
   - Test hash-txn returns correct 32-byte buffer hash
   - Test hash-txn for different transactions returns different hashes
   - Test extract-signer with valid signature returns correct signer principal
@@ -145,7 +145,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Test duplicate signature detection (same signer cannot sign twice)
   - Test signature verification works with `signMessageHashRsv` from @stacks/transactions
 
-- [ ] **Issue #11**: Write STX transfer execution tests
+- [ ] **Issue #11**: ❌ PENDING - Write STX transfer execution tests
   - Test successful execution with threshold signatures (e.g., 2/3 multisig with 2 signatures)
   - Test full end-to-end flow: submit → sign off-chain → execute
   - Test execution fails with insufficient signatures (below threshold)
@@ -157,7 +157,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Test that STX must be sent to multisig before execution
   - Test using `as-contract` wrapper for transfers
 
-- [ ] **Issue #12**: Write SIP-010 transfer execution tests
+- [ ] **Issue #12**: ❌ PENDING - Write SIP-010 transfer execution tests
   - Test successful execution with threshold signatures (e.g., 2/3 multisig with 2 signatures)
   - Test full end-to-end flow: submit → sign off-chain → execute
   - Test execution fails with insufficient signatures (below threshold)
