@@ -18,11 +18,11 @@ export function initMultisigWithSigners(signers: string[], threshold: number = 1
   return simnet.callPublicFn("multisig", "initialize", [signerList, thresholdValue], simnet.deployer);
 }
 
-export function submitStxTxn(sender: string, amount: number = 100) {
+export function submitStxTxn(sender: string, amount: number = 100, expiration: any = Cl.none()) {
   return simnet.callPublicFn(
     "multisig",
     "submit-txn",
-    [Cl.uint(0), Cl.uint(amount), Cl.principal(sender), Cl.none()],
+    [Cl.uint(0), Cl.uint(amount), Cl.principal(sender), Cl.none(), expiration],
     sender,
   );
 }
