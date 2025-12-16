@@ -8,9 +8,8 @@
 ;;   - contract-hash? (Issue #7) - Token contract verification
    ;;   - to-ascii? (Issues #2, #6, #7) - Enhanced logging
 
-;; SIP-010 trait import - will be used for token transfers
-;; Note: Trait syntax will be fixed when implementing Issue #7 (token transfers)
-;; (use-trait sip-010-trait-ft-standard 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard)
+;; SIP-010 trait import for token transfers
+(use-trait sip-010-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
 
 ;; ============================================
 ;; ========== temp test ==========
@@ -303,6 +302,96 @@
                                     type: u0,
                                     amount: (get amount txn),
                                     recipient: (get recipient txn),
+                                    signatures: (len signatures),
+                                    valid-signatures: valid-count
+                                })
+                                (ok true)
+                            )
+                        err-value ERR_STX_TRANSFER_FAILED
+                    )
+                )
+            )
+        )
+    )
+)
+
+;; Issue #7: Execute a pending SIP-010 token transfer transaction
+(define-public (execute-token-transfer-txn
+    (target-id uint)
+    (signatures (list 100 (buff 65)))
+    (token-contract <sip-010-trait>)
+)
+    (begin
+        ;; Verify contract is initialized
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+
+        ;; Verify caller is a signer
+        (asserts! (is-some (index-of (var-get signers) tx-sender)) ERR_NOT_SIGNER)
+
+        ;; Load and validate the transaction
+        (let (
+            (txn (unwrap! (map-get? transactions target-id) ERR_INVALID_TXN_ID))
+        )
+            ;; Verify transaction ID is valid (must be less than current txn-id)
+            (asserts! (< target-id (var-get txn-id)) ERR_INVALID_TXN_ID)
+
+            ;; Verify transaction type is SIP-010 (1)
+            (asserts! (is-eq (get type txn) u1) ERR_INVALID_TXN_TYPE)
+
+            ;; Verify token principal is provided
+            (asserts! (is-some (get token txn)) ERR_INVALID_TOKEN)
+
+            ;; Verify token contract parameter matches the stored token principal
+            (let ((stored-token (unwrap! (get token txn) ERR_INVALID_TOKEN)))
+                (asserts! (is-eq (contract-of token-contract) stored-token) ERR_INVALID_TOKEN)
+            )
+
+            ;; Verify transaction hasn't been executed
+            (asserts! (not (get executed txn)) ERR_TXN_ALREADY_EXECUTED)
+
+            ;; Verify signatures list length >= threshold
+            (asserts! (>= (len signatures) (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
+
+            ;; Compute txn hash and count unique valid signatures
+            (let (
+                (txn-hash (unwrap! (hash-txn target-id) ERR_INVALID_TXN_ID))
+                (result (fold
+                    count-valid-unique-signature
+                    signatures
+                    (build-signature-accumulator target-id txn-hash)
+                ))
+                (valid-count (get count result))
+            )
+                ;; Verify unique valid signature count >= threshold
+                (asserts! (>= valid-count (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
+
+                ;; Execute SIP-010 transfer from contract to recipient using as-contract wrapper
+                (let (
+                    (transfer-result (as-contract (contract-call? token-contract transfer 
+                        (get amount txn) 
+                        tx-sender 
+                        (get recipient txn) 
+                        none
+                    )))
+                )
+                    (match transfer-result
+                        ok-value
+                            (begin
+                                ;; Mark transaction as executed
+                                (map-set transactions target-id {
+                                    type: (get type txn),
+                                    amount: (get amount txn),
+                                    recipient: (get recipient txn),
+                                    token: (get token txn),
+                                    executed: true
+                                })
+                                ;; Log execution details
+                                (print {
+                                    txn-id: target-id,
+                                    type: u1,
+                                    amount: (get amount txn),
+                                    recipient: (get recipient txn),
+                                    token: (get token txn),
                                     signatures: (len signatures),
                                     valid-signatures: valid-count
                                 })

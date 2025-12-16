@@ -26,11 +26,6 @@
         (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
         ;; Execute transfer
         (try! (ft-transfer? mock-token amount sender recipient))
-        ;; Print memo if provided
-        (match memo
-            m (print m)
-            true
-        )
         (ok true)
     )
 )
