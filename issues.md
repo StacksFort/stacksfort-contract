@@ -82,7 +82,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Return `(ok true)`
   - **Clarity 4**: Use `to-ascii?` for enhanced human-readable logging (see CLARITY4-IMPLEMENTATION-PLAN.md)
 
-- [ ] **Issue #7**: Implement `execute-token-transfer-txn` function
+- [x] **Issue #7**: Implement `execute-token-transfer-txn` function
   - Verify caller is a signer
   - Load transaction from `transactions` map using transaction ID
   - Get transaction hash using `hash-txn` function
@@ -168,7 +168,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Test that tokens must be sent to multisig before execution
   - Test using `as-contract` wrapper for contract-call transfers
 
-- [ ] **Issue #13**: Create mock-token contract for testing
+- [x] **Issue #13**: Create mock-token contract for testing
   - Implement SIP-010 trait: `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard`
   - Define fungible token: `mock-token`
   - Implement `transfer` function (amount, sender, recipient, memo)
