@@ -53,3 +53,37 @@ export function countUniqueValidSignatures(txnId: number, signatures: string[]) 
     simnet.deployer,
   );
 }
+
+export function executeStxTransfer(txnId: number, signatures: string[], caller: string) {
+    const signatureList = Cl.list(signatures.map((signature) => Cl.bufferFromHex(signature)));
+    return simnet.callPublicFn(
+        "multisig",
+        "execute-stx-transfer-txn",
+        [Cl.uint(txnId), signatureList],
+        caller
+    );
+}
+
+export function getStxBalance(address: string): number {
+    const assets = simnet.getAssetsMap().get(address);
+    if (!assets) return 0;
+    return Number(assets.get("STX") || assets.get("stx") || 0);
+}
+
+export function fundMultisigWithStx(amount: number) {
+    // In simnet, we can't easily "mint" STX to a contract, but we can transfer from deployer
+    // deployer usually has infinite/large STX
+    const contractPrincipal = `${simnet.deployer}.multisig`;
+    return simnet.transferSTX((amount * 1000000), contractPrincipal, simnet.deployer);
+}
+
+// Issue #7 helper
+export function executeTokenTransfer(txnId: number, signatures: string[], tokenContract: string, caller: string) {
+    const signatureList = Cl.list(signatures.map((signature) => Cl.bufferFromHex(signature)));
+    return simnet.callPublicFn(
+        "multisig",
+        "execute-token-transfer-txn",
+        [Cl.uint(txnId), signatureList, Cl.contractPrincipal(simnet.deployer, tokenContract)],
+        caller
+    );
+}

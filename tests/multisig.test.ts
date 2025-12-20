@@ -8,6 +8,9 @@ import {
   bufferHexFromOk,
   signHash,
   countUniqueValidSignatures,
+  executeStxTransfer,
+  getStxBalance,
+  fundMultisigWithStx,
 } from "./helpers/signing";
 
 // Get test accounts from simnet
@@ -285,5 +288,113 @@ describe("Issue #10: Signature Verification Tests", () => {
       signer1.address
     );
     expect(extractResult.result).toBeOk(Cl.principal(signer1.address));
+  });
+});
+
+describe("Issue #11: STX Transfer Execution Tests", () => {
+  const signer1 = makeRandomSigner();
+  const signer2 = makeRandomSigner();
+
+  beforeEach(() => {
+    initMultisigWithSigners([signer1.address, signer2.address], 2);
+    // Fund the multisig contract so it can transfer STX
+    fundMultisigWithStx(10000); // Fund with 10,000 STX
+  });
+
+  it("should execute STX transfer with sufficient signatures", () => {
+    const amount = 1000;
+    // 1. Submit transaction
+    submitStxTxn(signer1.address, amount);
+    
+    // 2. Get hash
+    const result = getTxnHash(0, signer1.address);
+    const hashHex = bufferHexFromOk(result);
+    
+    // 3. Sign off-chain
+    const sig1 = signHash(hashHex, signer1.privateKey);
+    const sig2 = signHash(hashHex, signer2.privateKey);
+    
+    // 4. Execute
+    const executeResult = executeStxTransfer(0, [sig1, sig2], signer1.address);
+    expect(executeResult.result).toBeOk(Cl.bool(true));
+    
+    // 5. Verify executed flag
+    const txnResult = simnet.getMapEntry("multisig", "transactions", Cl.uint(0));
+    expect(txnResult).toBeSome(
+      Cl.tuple({
+        type: Cl.uint(0),
+        amount: Cl.uint(amount),
+        recipient: Cl.principal(signer1.address), // submitStxTxn uses sender as recipient
+        token: Cl.none(),
+        executed: Cl.bool(true),
+      })
+    );
+  });
+
+  it("should update balances correctly after execution", () => {
+    const amount = 2000;
+    const contractPrincipal = `${deployer}.multisig`;
+    const initialContractBalance = getStxBalance(contractPrincipal);
+    
+    submitStxTxn(signer1.address, amount);
+    
+    const hashHex = bufferHexFromOk(getTxnHash(0, signer1.address));
+    const sig1 = signHash(hashHex, signer1.privateKey);
+    const sig2 = signHash(hashHex, signer2.privateKey);
+    
+    const executeResult = executeStxTransfer(0, [sig1, sig2], signer1.address);
+    expect(executeResult.result).toBeOk(Cl.bool(true));
+    
+    const finalContractBalance = getStxBalance(contractPrincipal);
+    // Contract should have sent 'amount', so its balance decreases
+    expect(finalContractBalance).toBe(initialContractBalance - amount);
+  });
+
+  it("should fail execution with insufficient signatures", () => {
+    submitStxTxn(signer1.address, 1000);
+    const hashHex = bufferHexFromOk(getTxnHash(0, signer1.address));
+    const sig1 = signHash(hashHex, signer1.privateKey);
+    
+    // Only 1 signature, threshold is 2
+    const executeResult = executeStxTransfer(0, [sig1], signer1.address);
+    expect(executeResult.result).toBeErr(Cl.uint(11)); // ERR_INSUFFICIENT_SIGNATURES
+  });
+
+  it("should fail execution with invalid signatures", () => {
+    submitStxTxn(signer1.address, 1000);
+    const hashHex = bufferHexFromOk(getTxnHash(0, signer1.address));
+    const sig1 = signHash(hashHex, signer1.privateKey);
+    const badSig = "00".repeat(65);
+    
+    const executeResult = executeStxTransfer(0, [sig1, badSig], signer1.address);
+    // 1 valid + 1 invalid = 1 valid count. Threshold is 2.
+    expect(executeResult.result).toBeErr(Cl.uint(11)); // ERR_INSUFFICIENT_SIGNATURES
+  });
+
+  it("should fail if transaction already executed", () => {
+    submitStxTxn(signer1.address, 1000);
+    const hashHex = bufferHexFromOk(getTxnHash(0, signer1.address));
+    const sig1 = signHash(hashHex, signer1.privateKey);
+    const sig2 = signHash(hashHex, signer2.privateKey);
+    
+    // First execution
+    executeStxTransfer(0, [sig1, sig2], signer1.address);
+    
+    // Second execution
+    const executeResult2 = executeStxTransfer(0, [sig1, sig2], signer1.address);
+    expect(executeResult2.result).toBeErr(Cl.uint(10)); // ERR_TXN_ALREADY_EXECUTED
+  });
+  
+  it("should fail if contract has insufficient STX balance", () => {
+     // Create a new massive transaction that exceeds contract balance
+     const hugeAmount = 1000000000000;
+     submitStxTxn(signer1.address, hugeAmount); // ID 0
+     
+     const hashHex = bufferHexFromOk(getTxnHash(0, signer1.address));
+     const sig1 = signHash(hashHex, signer1.privateKey);
+     const sig2 = signHash(hashHex, signer2.privateKey);
+     
+     const executeResult = executeStxTransfer(0, [sig1, sig2], signer1.address);
+     expect(executeResult.result).toBeErr(Cl.uint(14)); // ERR_STX_TRANSFER_FAILED
   });
 });
