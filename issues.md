@@ -157,7 +157,7 @@ This project will leverage Clarity 4 features for enhanced security and function
   - Test that STX must be sent to multisig before execution
   - Test using `as-contract` wrapper for transfers
 
-- [ ] **Issue #12**: ❌ PENDING - Write SIP-010 transfer execution tests
+- [x] **Issue #12**: Write SIP-010 transfer execution tests
   - Test successful execution with threshold signatures (e.g., 2/3 multisig with 2 signatures)
   - Test full end-to-end flow: submit → sign off-chain → execute
   - Test execution fails with insufficient signatures (below threshold)
