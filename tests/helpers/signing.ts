@@ -22,7 +22,7 @@ export function submitStxTxn(sender: string, amount: number = 100) {
   return simnet.callPublicFn(
     "multisig",
     "submit-txn",
-    [Cl.uint(0), Cl.uint(amount), Cl.principal(sender), Cl.none()],
+    [Cl.uint(0), Cl.uint(amount), Cl.principal(sender), Cl.none(), Cl.none()],
     sender,
   );
 }
@@ -92,7 +92,7 @@ export function submitTokenTxn(sender: string, tokenContract: string, amount: nu
   return simnet.callPublicFn(
     "multisig",
     "submit-txn",
-    [Cl.uint(1), Cl.uint(amount), Cl.principal(sender), Cl.some(Cl.contractPrincipal(simnet.deployer, tokenContract))],
+    [Cl.uint(1), Cl.uint(amount), Cl.principal(sender), Cl.some(Cl.contractPrincipal(simnet.deployer, tokenContract)), Cl.none()],
     sender,
   );
 }

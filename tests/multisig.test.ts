@@ -89,6 +89,7 @@ describe("Issue #2: submit-txn function", () => {
         recipient: Cl.principal(signer1.address), // submitStxTxn uses sender as recipient
         token: Cl.none(),
         executed: Cl.bool(false),
+        expiration: Cl.some(Cl.uint(1011)), // Default 7 days in blocks
       })
     );
 
@@ -331,6 +332,7 @@ describe("Issue #11: STX Transfer Execution Tests", () => {
         recipient: Cl.principal(signer1.address), // submitStxTxn uses sender as recipient
         token: Cl.none(),
         executed: Cl.bool(true),
+        expiration: Cl.some(Cl.uint(1012)),
       })
     );
   });
@@ -461,6 +463,7 @@ describe("Issue #12: SIP-010 Transfer Execution Tests", () => {
         recipient: Cl.principal(signer1.address),
         token: Cl.some(Cl.contractPrincipal(deployer, tokenContract)),
         executed: Cl.bool(true),
+        expiration: Cl.some(Cl.uint(1012)),
       })
     );
     

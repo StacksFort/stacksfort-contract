@@ -61,6 +61,7 @@
 (define-constant ERR_INVALID_SIGNATURE (err u12))
 (define-constant ERR_INVALID_TOKEN (err u13))
 (define-constant ERR_STX_TRANSFER_FAILED (err u14))
+(define-constant ERR_TXN_EXPIRED (err u15))
 
 ;; ============================================
 ;; Data Variables
@@ -80,7 +81,8 @@
     amount: uint,
     recipient: principal,
     token: (optional principal),
-    executed: bool
+    executed: bool,
+    expiration: (optional uint)
   }
 )
 
@@ -134,6 +136,7 @@
     (amount uint)
     (recipient principal)
     (token (optional principal))
+    (expiration (optional uint))
 )
     (begin
         ;; Verify contract is initialized
@@ -151,19 +154,24 @@
                 true
             )
             ;; Get current txn-id from storage
-            (let ((current-id (var-get txn-id)))
+            (let (
+                (current-id (var-get txn-id))
+                (default-expiration (+ burn-block-height u1008)) ;; 7 days default (approx 10 min/block)
+                (txn-expiration (default-to default-expiration expiration))
+            )
                 ;; Store transaction in transactions map
                 (map-set transactions current-id {
                     type: txn-type,
                     amount: amount,
                     recipient: recipient,
                     token: token,
-                    executed: false
+                    executed: false,
+                    expiration: (some txn-expiration)
                 })
                 ;; Increment txn-id by 1
                 (var-set txn-id (+ current-id u1))
                 ;; Print transaction details for logging
-                (print {txn-id: current-id, type: txn-type, amount: amount, recipient: recipient, token: token})
+                (print {txn-id: current-id, type: txn-type, amount: amount, recipient: recipient, token: token, expiration: txn-expiration})
                 (ok current-id)
             )
         )
@@ -265,6 +273,11 @@
             ;; Verify transaction hasn't been executed
             (asserts! (not (get executed txn)) ERR_TXN_ALREADY_EXECUTED)
 
+            ;; Verify transaction hasn't expired
+            (let ((txn-expiration (unwrap! (get expiration txn) ERR_INVALID_TXN_ID)))
+                (asserts! (<= burn-block-height txn-expiration) ERR_TXN_EXPIRED)
+            )
+
             ;; Verify signatures list length >= threshold
             (asserts! (>= (len signatures) (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
 
@@ -294,7 +307,8 @@
                                     amount: (get amount txn),
                                     recipient: (get recipient txn),
                                     token: (get token txn),
-                                    executed: true
+                                    executed: true,
+                                    expiration: (get expiration txn)
                                 })
                                 ;; Log execution details
                                 (print {
@@ -349,6 +363,11 @@
             ;; Verify transaction hasn't been executed
             (asserts! (not (get executed txn)) ERR_TXN_ALREADY_EXECUTED)
 
+            ;; Verify transaction hasn't expired
+            (let ((txn-expiration (unwrap! (get expiration txn) ERR_INVALID_TXN_ID)))
+                (asserts! (<= burn-block-height txn-expiration) ERR_TXN_EXPIRED)
+            )
+
             ;; Verify signatures list length >= threshold
             (asserts! (>= (len signatures) (var-get threshold)) ERR_INSUFFICIENT_SIGNATURES)
 
@@ -383,7 +402,8 @@
                                     amount: (get amount txn),
                                     recipient: (get recipient txn),
                                     token: (get token txn),
-                                    executed: true
+                                    executed: true,
+                                    expiration: (get expiration txn)
                                 })
                                 ;; Log execution details
                                 (print {
