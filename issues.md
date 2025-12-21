@@ -15,44 +15,44 @@ The multisig frontend follows this workflow:
 
 ### Setup & Configuration
 
-- [ ] **Issue #19**: Set up Next.js project with TypeScript
-  - Initialize Next.js with App Router
-  - Configure TypeScript
-  - Set up Tailwind CSS
-  - Configure path aliases
+- [x] **Issue #19**: Set up Next.js project with TypeScript
+  - ✅ Initialize Next.js with App Router
+  - ✅ Configure TypeScript
+  - ✅ Set up Tailwind CSS
+  - ✅ Configure path aliases
 
 - [x] **Issue #20**: Install and configure Stacks dependencies
   - ✅ Install @stacks/connect (v7.2.0)
   - ✅ Install @stacks/transactions (v7.2.0)
-  - [ ] Configure wallet connection
+  - ✅ Configure wallet connection
 
-- [ ] **Issue #21**: Set up project structure
-  - Create component directories
-  - Create hooks directory
-  - Create lib utilities directory
-  - Set up routing structure
+- [x] **Issue #21**: Set up project structure
+  - ✅ Create component directories
+  - ✅ Create hooks directory
+  - ✅ Create lib utilities directory
+  - ✅ Set up routing structure
 
 ### Core Components
 
 - [x] **Issue #22**: Create Navbar component
-  - Wallet connection button
-  - Disconnect functionality
-  - Network indicator
-  - Navigation links
+  - ✅ Wallet connection button
+  - ✅ Disconnect functionality
+  - ✅ Network indicator
+  - ✅ Navigation links
 
-- [ ] **Issue #23**: Create useStacks hook
-  - Wallet connection logic
-  - User data management
-  - Session persistence
-  - Disconnect functionality
+- [x] **Issue #23**: Create useStacks hook (implemented as useStacksWallet)
+  - ✅ Wallet connection logic
+  - ✅ User data management
+  - ✅ Session persistence
+  - ✅ Disconnect functionality
 
-- [ ] **Issue #24**: Create useMultisig hook
-  - Contract interaction functions (read-only and public functions)
-  - Transaction fetching from contract state
-  - State management for multisig data (signers, threshold, transactions)
-  - Error handling for contract calls
-  - Helper functions to check if user is a signer
-  - Helper functions to get transaction status
+- [x] **Issue #24**: Create useMultisig hook
+  - ✅ Contract interaction functions (read-only and public functions)
+  - ✅ Transaction fetching from contract state
+  - ✅ State management for multisig data (signers, threshold, transactions)
+  - ✅ Error handling for contract calls
+  - ✅ Helper functions to check if user is a signer
+  - ✅ Helper functions to get transaction status
 
 - [ ] **Issue #25**: Create MultisigDashboard component
   - Display multisig address
